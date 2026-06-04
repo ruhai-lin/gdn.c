@@ -1,0 +1,12 @@
+numpy
+pytest
+Requests
+sentencepiece
+torch>=2.7.0
+triton>=3.3
+transformers>=4.45.0
+einops
+flash-linear-attention
+tilelang>=0.1.9
+tqdm
+wandb
