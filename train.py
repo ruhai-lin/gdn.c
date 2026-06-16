@@ -20,7 +20,7 @@ from model import GDNLM as Transformer, ModelArgs, model_export
 from torch.distributed import destroy_process_group, init_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from tinystories import Task
+from climbmix import Task
 
 # -----------------------------------------------------------------------------
 # I/O

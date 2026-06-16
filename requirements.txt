@@ -1,5 +1,8 @@
+jinja2
 numpy
+pyarrow
 pytest
+PyYAML
 Requests
 sentencepiece
 torch>=2.7.0
