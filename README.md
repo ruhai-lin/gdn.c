@@ -5,7 +5,7 @@ GDN（Gated Delta Net）架构实现：线性注意力 + 门控状态更新，�
 所有命令默认从本子目录执行：
 
 ```bash
-cd /home/ruhai/Projects/gpts.c/gdn.c
+cd ~/Projects/gdn.c
 ```
 
 创建虚拟环境
@@ -131,15 +131,27 @@ torchrun --standalone --nproc_per_node=8 train.py \
 make
 ```
 
-### 运行
+### 导出与运行
+
+`export.py` 提供两个与 C 程序对应的格式：v1 是供 `run` 使用的 FP32
+权重，v2 是供 `runq` 使用的 Q8_0 量化权重。
 
 ```bash
-# 260K 模型
-./run outputs/260K/model.bin -z ../tok512.bin -t 0 -p 0.9 -s 1337 -n 128 -i "Once upon a time,"
+# FP32（v1）
+python export.py --checkpoint outputs/climbmix15M/climbmix15M.pt \
+  --output outputs/climbmix15M/climbmix15M.bin --version 1
+./run outputs/climbmix15M/climbmix15M.bin \
+  -z tokenizer.bin -t 0 -p 0.9 -s 1337 -n 128 -i "Once upon a time,"
 
-# 15M 模型（使用 Llama 2 tokenizer）
-./run outputs/15M/model.bin -z ../tokenizer.bin -t 0 -p 0.9 -s 1337 -n 128 -i "Once upon a time,"
+# Q8_0（v2）
+python export.py --checkpoint outputs/climbmix15M/climbmix15M.pt \
+  --output outputs/climbmix15M/climbmix15M_q8.bin --version 2 --group-size 32
+./runq outputs/climbmix15M/climbmix15M_q8.bin \
+  -z tokenizer.bin -t 0 -p 0.9 -s 1337 -n 128 -i "Once upon a time,"
 ```
+
+其他模型同样只需替换 checkpoint 和输出路径。例如使用自训练的 512 词
+tokenizer 运行 260K 模型时，传入 `-z tok512.bin`。
 
 `-z` 指定 tokenizer，`-t` 温度，`-p` top-p，`-s` 随机种子，`-n` 生成 token 数，`-i` 提示词。
 
@@ -190,4 +202,3 @@ ClimbMix 上训练 100k iter（~50B tokens）后的 CORE benchmark 结果：
 | boolq | 0.5196 | 0.4976 | 0.5450 | -0.2643 | -0.3222 | -0.1975 |
 | bigbench_language_identification | 0.2543 | 0.2514 | 0.2547 | 0.1796 | 0.1765 | 0.1801 |
 | **CORE** | — | — | — | **0.0501** | **0.0918** | **0.1416** |
-

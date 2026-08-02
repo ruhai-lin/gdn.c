@@ -1,5 +1,7 @@
 /* Inference for the Gated DeltaNet language model in pure C. */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <ctype.h>
 #include <math.h>
 #include <stdint.h>
@@ -188,6 +190,10 @@ static void read_checkpoint(const char *path, GDN *model) {
     }
     if (magic != 0x47444e65) {
         fprintf(stderr, "bad checkpoint magic for GDN: 0x%08x\n", magic);
+        exit(EXIT_FAILURE);
+    }
+    if (version != 0 && version != 1) {
+        fprintf(stderr, "run requires an fp32 checkpoint (version 0 or 1), got %d\n", version);
         exit(EXIT_FAILURE);
     }
     if (fread(&model->config, sizeof(Config), 1, f) != 1) {

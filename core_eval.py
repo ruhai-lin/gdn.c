@@ -30,8 +30,7 @@ from jinja2 import Template
 from tqdm import tqdm
 import yaml
 
-from export import load_checkpoint
-from model import model_export
+from export import load_checkpoint, model_export
 from tokenizer import Tokenizer
 
 DATA_CACHE_DIR = "data"

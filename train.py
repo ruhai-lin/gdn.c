@@ -16,7 +16,8 @@ from datetime import datetime
 from functools import partial
 
 import torch
-from model import GDNLM as Transformer, ModelArgs, model_export
+from export import model_export
+from model import GDNLM as Transformer, ModelArgs
 from torch.distributed import destroy_process_group, init_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 

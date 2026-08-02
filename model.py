@@ -1,6 +1,5 @@
 import inspect
 import math
-import struct
 from dataclasses import dataclass
 from typing import Optional
 
@@ -165,72 +164,3 @@ class GDNLM(nn.Module):
                 idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
-
-
-# -----------------------------------------------------------------------------
-# Export
-
-
-def serialize_fp32(file, tensor):
-    d = tensor.detach().cpu().view(-1).to(torch.float32).numpy()
-    b = struct.pack(f"{len(d)}f", *d)
-    file.write(b)
-
-
-def model_export(model, filepath, version=0):
-    """Export GDNLM weights to a C-readable binary file."""
-    p = model.params
-    shared_classifier = torch.equal(model.tok_embeddings.weight, model.output.weight)
-
-    out_file = open(filepath, "wb")
-    out_file.write(struct.pack("I", 0x47444E65))
-    out_file.write(struct.pack("i", version))
-    out_file.write(
-        struct.pack(
-            "iiiiiiiiiii",
-            p.dim,
-            p.hidden_dim,
-            p.n_layers,
-            p.num_heads,
-            p.head_k_dim,
-            p.head_v_dim,
-            p.conv_size,
-            p.vocab_size,
-            p.max_seq_len,
-            int(shared_classifier),
-            0,
-        )
-    )
-    pad = 256 - out_file.tell()
-    assert pad >= 0
-    out_file.write(b"\0" * pad)
-
-    serialize_fp32(out_file, model.tok_embeddings.weight)
-    for layer in model.layers:
-        m = layer.mixer
-        f = layer.ffn
-        serialize_fp32(out_file, layer.attn_norm.weight)
-        serialize_fp32(out_file, m.q_proj.weight)
-        serialize_fp32(out_file, m.k_proj.weight)
-        serialize_fp32(out_file, m.v_proj.weight)
-        serialize_fp32(out_file, m.a_proj.weight)
-        serialize_fp32(out_file, m.b_proj.weight)
-        serialize_fp32(out_file, m.g_proj.weight)
-        serialize_fp32(out_file, m.q_conv1d.weight)
-        serialize_fp32(out_file, m.k_conv1d.weight)
-        serialize_fp32(out_file, m.v_conv1d.weight)
-        A = -torch.exp(m.A_log.float())
-        serialize_fp32(out_file, A)
-        serialize_fp32(out_file, m.dt_bias)
-        serialize_fp32(out_file, m.o_norm.weight)
-        serialize_fp32(out_file, m.o_proj.weight)
-        serialize_fp32(out_file, layer.ffn_norm.weight)
-        serialize_fp32(out_file, f.gate_proj.weight)
-        serialize_fp32(out_file, f.down_proj.weight)
-        serialize_fp32(out_file, f.up_proj.weight)
-    serialize_fp32(out_file, model.norm.weight)
-    if not shared_classifier:
-        serialize_fp32(out_file, model.output.weight)
-
-    out_file.close()
-    print(f"wrote {filepath}")
