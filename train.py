@@ -37,22 +37,22 @@ wandb_log = False
 wandb_project = "gdnc"
 wandb_run_name = "run" + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 # data
-batch_size = 128
-max_seq_len = 256
+batch_size = 64
+max_seq_len = 1024
 vocab_source = "llama2"
 vocab_size = 32000
 # model (~15M params with weight tying)
-dim = 288
-n_layers = 6
-num_heads = 4
-head_k_dim = 72
-head_v_dim = 72
+dim = 256
+n_layers = 8
+num_heads = 8
+head_k_dim = 32
+head_v_dim = 32
 hidden_dim = 768
 conv_size = 4
 norm_eps = 1e-5
 dropout = 0.0
 # adamw optimizer
-gradient_accumulation_steps = 4
+gradient_accumulation_steps = 8
 learning_rate = 5e-4
 max_iters = 100000
 weight_decay = 1e-1

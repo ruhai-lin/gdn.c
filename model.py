@@ -12,18 +12,18 @@ from fla.modules import GatedMLP, RMSNorm
 
 @dataclass
 class ModelArgs:
-    dim: int = 288
-    n_layers: int = 6
-    num_heads: int = 4
-    head_k_dim: int = 72
-    head_v_dim: int = 72
+    dim: int = 256
+    n_layers: int = 8
+    num_heads: int = 8
+    head_k_dim: int = 32
+    head_v_dim: int = 32
     hidden_dim: int = 768
     hidden_ratio: int = 4
     expand_v: float = 1.0
     attn_mode: str = "chunk"
     conv_size: int = 4
     vocab_size: int = 32000
-    max_seq_len: int = 256
+    max_seq_len: int = 1024
     norm_eps: float = 1e-5
     dropout: float = 0.0
 
